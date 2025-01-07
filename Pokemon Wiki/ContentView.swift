@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    //let defaultURL:String = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/25.png"
+    @State var pokeName:String = ""
     @State var wrapper:ApiNetwork.Wrapper? = nil
-    @State var defaultWrapper:ApiNetwork.Wrapper = ApiNetwork.Wrapper(id: 0, name: "Sin nombre", weight: 0, sprites: ApiNetwork.Sprites(front_default: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png"), types: [ApiNetwork.Types(type: ApiNetwork.Type2(name: ""))],
+    @State var defaultWrapper:ApiNetwork.Wrapper = ApiNetwork.Wrapper(id: 0, name: "", weight: 0, height: 0 ,
+                                                                      sprites: ApiNetwork.Sprites(front_default: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png"),
+                                                                      types: [ApiNetwork.Types(type: ApiNetwork.Type2(name: ""))],
                                                                       moves: [],
                                                                       stats: [ApiNetwork.Stats(base_stat: 0, stat: ApiNetwork.Stat(name: "")), ApiNetwork.Stats(base_stat: 0, stat: ApiNetwork.Stat(name: "")), ApiNetwork.Stats(base_stat: 0, stat: ApiNetwork.Stat(name: "")), ApiNetwork.Stats(base_stat: 0, stat: ApiNetwork.Stat(name: "")), ApiNetwork.Stats(base_stat: 0, stat: ApiNetwork.Stat(name: ""))])
-    @State var pokeName:String = ""
     
     var body: some View {
         ZStack {
@@ -30,9 +31,9 @@ struct ContentView: View {
                         Task{
                             do{
                                 wrapper = try await ApiNetwork().getPokeByName(name: pokeName.lowercased())
-                                print(wrapper!.sprites.front_default)
+
                             }catch{
-                                print("ERROR")
+                                print("Error al obtener datos desde la API")
                             }
                         }
                     }
@@ -48,74 +49,57 @@ struct CreateResultView:View{
     var body: some View{
         
         VStack {
-            Text(mywrap.name.capitalized).font(.largeTitle).bold()
+            Text(mywrap.name.capitalized).font(.largeTitle).bold().padding(.top)
             HStack{
                 VStack{
-                    Text("Nombre: ").bold() + Text(mywrap.name.capitalized)
-                    Text("Nº Pokédex: ").bold() + Text("\(mywrap.id)")
-                    Text("Peso: ").bold() + Text("\(mywrap.weight)Kg")
                     HStack{
                         Text("Tipo: ").bold()
                         ForEach(mywrap.types, id: \.type.name) { type in
                             Text(typeTranslator(value: type.type.name))
                         }
                     }
-                    HStack{
-                        
-                    }
-                   
+                    Text("Nº Pokédex: ").bold() + Text("\(mywrap.id)")
+                    Text("Peso: ").bold() + Text("\(mywrap.weight)Kg")
+                    Text("Altura: ").bold() + Text(String(format: "%.2f", Float(mywrap.height) / 10) + "m")
                 }
+                Spacer()
                 AsyncImage(url: URL(string: mywrap.sprites.front_default))
                     .frame(width: 120, height: 120)
             }
             Text("Movimientos: ").bold()
             List(mywrap.moves, id: \.move.name){ move in
                 Text(move.move.name.capitalized).listRowSeparator(.hidden).listRowBackground(Color("component").opacity(0.5)).cornerRadius(10)
-            }.frame(maxWidth: 320, maxHeight: 200).listStyle(.plain).cornerRadius(10)
-            /*ForEach(mywrap.stats, id: \.stat.name){ stat in
-                Text(stat.stat.name).bold() + Text(String(stat.base_stat))
-            }*/
-            HStack{
-                Image(systemName: "heart.fill")
-                Text("Salud").font(.footnote)
-                Spacer()
-                Gauge(value: mapToRange(value: Double(mywrap.stats[0].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(.red)
-            }
-            HStack{
-                Image(systemName: "bolt.fill")
-                Text("Ataque").font(.footnote)
-                Spacer()
-                Gauge(value: mapToRange(value: Double(mywrap.stats[1].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(.orange)
-            }
-            HStack{
-                Image(systemName: "shield.fill")
-                Text("Defensa").font(.footnote)
-                Spacer()
-                Gauge(value: mapToRange(value: Double(mywrap.stats[2].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(.blue)
-            }
-            HStack{
-                Image(systemName: "sparkles")
-                Text("Ataque X").font(.footnote)
-                Spacer()
-                Gauge(value: mapToRange(value: Double(mywrap.stats[3].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(.purple)
-            }
-            HStack{
-                Image(systemName: "bolt.shield.fill")
-                Text("Defensa X").font(.footnote)
-                Spacer()
-                Gauge(value: mapToRange(value: Double(mywrap.stats[4].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(.green)
-            }.padding(.bottom)
+            }.frame(maxWidth: 320, maxHeight: 200).listStyle(.plain).cornerRadius(10).padding(.bottom)
+
+            // Medidores de estadísiticas
+            gaugeStatView(systemImage: "heart.fill", text: "Salud", stat: 0, wrap: mywrap, color: "stat_red") //Salud
+            gaugeStatView(systemImage: "bolt.fill", text: "Ataque", stat: 1, wrap: mywrap, color: "stat_orange") //Ataque
+            gaugeStatView(systemImage: "shield.fill", text: "Defensa", stat: 2, wrap: mywrap, color: "stat_blue") //Defensa
+            gaugeStatView(systemImage: "sparkles", text: "Ataque X", stat: 3, wrap: mywrap, color: "stat_purple") //Ataque X
+            gaugeStatView(systemImage: "bolt.shield.fill", text: "Defensa X", stat: 4, wrap: mywrap, color: "stat_green").padding(.bottom) //Defensa X
             
         }.padding(.horizontal)
             .frame(maxWidth: 350)
-            .frame(height: 520)
+            .frame(height: 550)
             .background(Color("component").opacity(0.5))
             .cornerRadius(16)
     }
 }
 
-func tryToPrint(value:String){
-    print(value)
+struct gaugeStatView:View {
+    let systemImage:String
+    let text:String
+    let stat:Int
+    let wrap:ApiNetwork.Wrapper
+    let color:String
+    var body: some View {
+        HStack{
+            Image(systemName: systemImage)
+            Text(text).font(.footnote)
+            Spacer()
+            Gauge(value: mapToRange(value: Double(wrap.stats[stat].base_stat), inputMin: 0.0, inputMax: 150.0, outputMin: 0.0, outputMax: 1.0)) {}.frame(minWidth: 200, maxWidth: 200, minHeight: 10, maxHeight: 10).tint(Color(color))
+        }
+    }
 }
 
 func mapToRange(value: Double, inputMin: Double, inputMax: Double, outputMin: Double, outputMax: Double) -> Double {
@@ -162,7 +146,7 @@ func typeTranslator(value:String) -> String{
     case "fairy":
         return "Hada"
     default:
-        return "Sin tipo"
+        return "-"
     }
 }
 #Preview {

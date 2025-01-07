@@ -13,6 +13,7 @@ class ApiNetwork{
         let id:Int
         let name:String
         let weight:Int
+        let height:Int
         let sprites:Sprites
         let types:[Types]
         let moves:[Moves]
