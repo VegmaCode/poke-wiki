@@ -8,7 +8,7 @@ Los usuarios pueden introducir el nombre de un Pokémon y visualizar detalles co
 El diseño incluye un fondo con desenfoque, un campo de búsqueda estilizado y una tarjeta donde se presentan los resultados. 
 Las estadísticas se muestran con gráficos de barras coloridos para facilitar la comprensión.
 
-![Captura de pantalla](./Resources/Screenshot.jpg)
+![Captura de pantalla](./Resources/Screenshot.png)
 
 ## Características principales
 
