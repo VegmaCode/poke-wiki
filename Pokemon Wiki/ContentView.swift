@@ -19,13 +19,22 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             Image("background").resizable().frame(width: 480, height: 920).scaledToFill().blur(radius: 2)
-            
-            VStack{
+            AnimatedMeshGradient().ignoresSafeArea().opacity(0.7)
+            MeshGradient(width: 3, height: 3, points: [
+                        [0.0, 0.0], [0.5, 0.0], [1.0, 0.0],
+                        [0.0, 0.5], [0.5, 0.5], [1.0, 0.5],
+                        [0.0, 1.0], [0.5, 1.0], [1.0, 1.0],
+                    ], colors: [
+                        .yellow, .purple, .red,
+                        .indigo, .orange, .mint,
+                        .blue, .white, .purple
+                    ]).ignoresSafeArea()
+              VStack{
                 TextField("Buscar Pokémon", text: $pokeName)
                     .frame(width: 300, height: 60)
                     .padding(.horizontal)
                     .autocorrectionDisabled()
-                    .background(Color("component").opacity(0.8))
+                    .background(Color(.white).opacity(0.5))
                     .cornerRadius(10)
                     .onSubmit {
                         Task{
@@ -71,17 +80,16 @@ struct CreateResultView:View{
                 Text(move.move.name.capitalized).listRowSeparator(.hidden).listRowBackground(Color("component").opacity(0.5)).cornerRadius(10)
             }.frame(maxWidth: 320, maxHeight: 200).listStyle(.plain).cornerRadius(10).padding(.bottom)
 
-            // Medidores de estadísiticas
-            gaugeStatView(systemImage: "heart.fill", text: "Salud", stat: 0, wrap: mywrap, color: "stat_red") //Salud
-            gaugeStatView(systemImage: "bolt.fill", text: "Ataque", stat: 1, wrap: mywrap, color: "stat_orange") //Ataque
-            gaugeStatView(systemImage: "shield.fill", text: "Defensa", stat: 2, wrap: mywrap, color: "stat_blue") //Defensa
-            gaugeStatView(systemImage: "sparkles", text: "Ataque X", stat: 3, wrap: mywrap, color: "stat_purple") //Ataque X
+            gaugeStatView(systemImage: "heart.fill", text: "Salud", stat: 0, wrap: mywrap, color: "stat_red")
+            gaugeStatView(systemImage: "bolt.fill", text: "Ataque", stat: 1, wrap: mywrap, color: "stat_orange")
+            gaugeStatView(systemImage: "shield.fill", text: "Defensa", stat: 2, wrap: mywrap, color: "stat_blue")
+            gaugeStatView(systemImage: "sparkles", text: "Ataque X", stat: 3, wrap: mywrap, color: "stat_purple")
             gaugeStatView(systemImage: "bolt.shield.fill", text: "Defensa X", stat: 4, wrap: mywrap, color: "stat_green").padding(.bottom) //Defensa X
             
         }.padding(.horizontal)
             .frame(maxWidth: 350)
             .frame(height: 550)
-            .background(Color("component").opacity(0.5))
+            .background(Color(.white).opacity(0.3))
             .cornerRadius(16)
     }
 }
